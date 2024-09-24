@@ -1,0 +1,58 @@
+name: Python Autotests
+
+on: 
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: Choose tests set
+        required: true
+        type: choice
+        default: smoke
+        options:
+          - smoke
+          - regression
+          - all
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    name: Run Selenium UI Tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.1'
+      
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Start Selenium Chrome service
+        uses: GabrielBB/xvfb-action@v1
+
+      - name: Run all tests
+        if: "github.event.inputs.deployment_target == 'all'"  
+        run: |
+          pytest --driver Chrome --disable-warnings --alluredir=allure-results
+      
+      - name: Run smoke tests
+        if: "github.event.inputs.deployment_target == 'smoke'"
+        run: |
+          pytest -m smoke --driver Chrome --disable-warnings --alluredir=allure-results
+
+      - name: Run regression tests
+        if: "github.event.inputs.deployment_target == 'regression'"
+        run: |
+          pytest -m regression --driver Chrome --disable-warnings --alluredir=allure-results
+
+      - name: Upload allure results
+        uses: actions/upload-artifact@v2
+        with:
+          name: allure-results
+          path: allure-results
