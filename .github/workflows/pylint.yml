@@ -52,7 +52,7 @@ jobs:
           pytest -m regression --driver Chrome --disable-warnings --alluredir=allure-results
 
       - name: Upload allure results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: allure-results
           path: allure-results
