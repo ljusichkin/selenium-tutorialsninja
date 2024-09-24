@@ -34,38 +34,38 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Install Java
-        run: sudo apt-get install -y openjdk-11-jdk
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Install Allure
         run: |
-          wget -qO allure.zip "https://github.com/allure-framework/allure2/releases/latest/download/allure-2.24.0.zip"
-          unzip allure.zip -d /opt/
-          sudo ln -s /opt/allure-2.24.0/bin/allure /usr/local/bin/allure
+          sudo wget -q https://github.com/allure-framework/allure2/releases/download/2.30.0/allure-2.30.0.tgz
+          sudo tar -zxvf allure-2.30.0.tgz -C /opt/
+          sudo ln -s /opt/allure-2.30.0/bin/allure /usr/local/bin/allure
 
       - name: Run all tests
-        if: "github.event.inputs.deployment_target == 'all'"
+        if: github.event.inputs.deployment_target == 'all'
         run: pytest --alluredir=allure-results
 
       - name: Run smoke tests
-        if: "github.event.inputs.deployment_target == 'smoke'"
+        if: github.event.inputs.deployment_target == 'smoke'
         run: pytest -m smoke --alluredir=allure-results
 
       - name: Run regression tests
-        if: "github.event.inputs.deployment_target == 'regression'"
+        if: github.event.inputs.deployment_target == 'regression'
         run: pytest -m regression --alluredir=allure-results
 
-      - name: Generate Allure Report
-        run: |
-          allure generate allure-results --clean -o allure-report
+      - name: Add Executor And Categories in Allure Results
+        run: cp -r categories.json executor.json allure-results/
 
-      - name: Upload Allure Report
+      - name: Generate Report
+        run: allure generate allure-results --clean -o allure-report
+
+      - name: Save Allure Report
         uses: actions/upload-artifact@v3
         with:
-          name: Allure Report
+          name: allure-report
           path: allure-report
-
-      - name: Publish Allure Report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./allure-report
+          retention-days: 1
