@@ -42,17 +42,17 @@ jobs:
       - name: Run all tests
         if: "github.event.inputs.deployment_target == 'all'"  
         run: |
-          pytest --driver Chrome --disable-warnings --alluredir=allure-results
+          pytest --disable-warnings --alluredir=allure-results
       
       - name: Run smoke tests
         if: "github.event.inputs.deployment_target == 'smoke'"
         run: |
-          pytest -m smoke --driver Chrome --disable-warnings --alluredir=allure-results
+          pytest -m smoke --disable-warnings --alluredir=allure-results
 
       - name: Run regression tests
         if: "github.event.inputs.deployment_target == 'regression'"
         run: |
-          pytest -m regression --driver Chrome --disable-warnings --alluredir=allure-results
+          pytest -m regression --disable-warnings --alluredir=allure-results
 
       - name: Upload allure results
         uses: actions/upload-artifact@v3
