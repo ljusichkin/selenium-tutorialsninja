@@ -35,6 +35,9 @@ jobs:
 
       - name: Start Selenium Chrome service
         uses: GabrielBB/xvfb-action@v1
+        with:
+          run: |
+            pytest --driver Chrome --disable-warnings --alluredir=allure-results
 
       - name: Run all tests
         if: "github.event.inputs.deployment_target == 'all'"  
